@@ -23,7 +23,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentTab, onTabChange 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">AI 图片生成器</h1>
+              <h1 className="text-xl font-bold text-gray-900">Comfy-FC图片生成器</h1>
             </div>
             
             <div className="flex items-center space-x-4">

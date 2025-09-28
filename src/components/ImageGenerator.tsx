@@ -18,6 +18,7 @@ export const ImageGenerator: React.FC = () => {
     positive: string;
     negative: string;
   } | null>(null);
+  const [savePromptMessage, setSavePromptMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   // 使用useMemo确保apiClient只在token变化时重新创建
   const apiClient = useMemo(() => {
@@ -49,16 +50,9 @@ export const ImageGenerator: React.FC = () => {
     let positive = '';
     let negative = '';
 
-    if (selectedPromptIndex !== null) {
-      const selectedPrompt = prompts.find(p => p.index === selectedPromptIndex);
-      if (selectedPrompt) {
-        positive = selectedPrompt.positive;
-        negative = selectedPrompt.negative;
-      }
-    } else {
-      positive = customPositive.trim();
-      negative = customNegative.trim();
-    }
+    // 不管是否选择了预设Prompt，都使用当前输入框中的内容
+    positive = customPositive.trim();
+    negative = customNegative.trim();
 
     if (!positive) {
       setError('请输入或选择一个 positive prompt');
@@ -88,6 +82,34 @@ export const ImageGenerator: React.FC = () => {
     }
   };
 
+  // 添加保存Prompt到在线列表的函数
+  const handleSavePrompt = async () => {
+    if (!apiClient || !lastGeneration) return;
+    
+    try {
+      const response = await apiClient.addPrompt(
+        lastGeneration.positive, 
+        lastGeneration.negative
+      );
+      
+      if (response.success) {
+        // 重新加载Prompt列表以包含新添加的Prompt
+        loadPrompts();
+        // 设置保存成功提示
+        setSavePromptMessage({type: 'success', text: 'Prompt保存成功！'});
+      } else {
+        setSavePromptMessage({type: 'error', text: `保存失败: ${response.message}`});
+      }
+    } catch (err) {
+      setSavePromptMessage({type: 'error', text: `保存时出错: ${err instanceof Error ? err.message : '未知错误'}`});
+    }
+    
+    // 3秒后自动清除提示消息
+    setTimeout(() => {
+      setSavePromptMessage(null);
+    }, 3000);
+  };
+
   const handlePromptSelect = (index: number) => {
     setSelectedPromptIndex(index);
     const selectedPrompt = prompts.find(p => p.index === index);
@@ -95,10 +117,6 @@ export const ImageGenerator: React.FC = () => {
       setCustomPositive(selectedPrompt.positive);
       setCustomNegative(selectedPrompt.negative);
     }
-  };
-
-  const handleUseCustom = () => {
-    setSelectedPromptIndex(null);
   };
 
   if (!isAuthenticated) {
@@ -111,7 +129,7 @@ export const ImageGenerator: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">AI 图片生成</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">图片生成</h1>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -126,37 +144,22 @@ export const ImageGenerator: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-900">选择 Prompt</h2>
             
-            {prompts.length > 0 && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-800 mb-2">
-                  预设 Prompt
-                </label>
-                <select
-                  value={selectedPromptIndex || ''}
-                  onChange={(e) => handlePromptSelect(parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                >
-                  <option value="">选择预设 Prompt</option>
-                  {prompts.map((prompt) => (
-                    <option key={prompt.index} value={prompt.index}>
-                      Prompt #{prompt.index}: {prompt.positive.substring(0, 50)}...
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
             <div className="mb-4">
-              <button
-                onClick={handleUseCustom}
-                className={`px-4 py-2 rounded-md text-sm btn-mobile ${
-                  selectedPromptIndex === null
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                }`}
+              <label className="block text-sm font-medium text-gray-800 mb-2">
+                预设 Prompt
+              </label>
+              <select
+                value={selectedPromptIndex || ''}
+                onChange={(e) => handlePromptSelect(parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
               >
-                使用自定义 Prompt
-              </button>
+                <option value="">选择预设 Prompt</option>
+                {prompts.map((prompt) => (
+                  <option key={prompt.index} value={prompt.index}>
+                    Prompt #{prompt.index}: {prompt.positive.substring(0, 50)}...
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-4">
@@ -199,7 +202,42 @@ export const ImageGenerator: React.FC = () => {
           {/* 生成信息 */}
           {lastGeneration && (
             <div className="bg-white rounded-lg shadow-md p-6 text-gray-900">
-              <h3 className="text-lg font-semibold mb-3">生成信息</h3>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-semibold">生成信息</h3>
+                <div className="relative">
+                  <button 
+                    onClick={handleSavePrompt}
+                    className="text-red-500 hover:text-red-700 focus:outline-none"
+                    title="保存Prompt到列表"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </button>
+                  
+                  {/* 保存提示消息 */}
+                  {savePromptMessage && (
+                    <div className={`absolute right-0 mt-2 w-48 p-2 rounded-md shadow-lg z-10 ${
+                      savePromptMessage.type === 'success' 
+                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        : 'bg-red-100 text-red-800 border border-red-200'
+                    }`}>
+                      <div className="flex items-center">
+                        {savePromptMessage.type === 'success' ? (
+                          <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        <span className="text-sm">{savePromptMessage.text}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="space-y-2 text-sm">
                 <p><span className="font-medium">种子:</span> {lastGeneration.seed}</p>
               </div>
@@ -209,6 +247,8 @@ export const ImageGenerator: React.FC = () => {
 
         {/* 右侧：图片展示 */}
         <div className="space-y-6">
+          {/* 移除了之前的弹窗代码 */}
+
           {generating && (
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>

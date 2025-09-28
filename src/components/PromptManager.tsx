@@ -10,8 +10,8 @@ export const PromptManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [newPrompt, setNewPrompt] = useState({ positive: '', negative: '' });
-  const [editPrompt, setEditPrompt] = useState({ positive: '', negative: '' });
+  const [newPrompt, setNewPrompt] = useState({ positive: '', negative: 'deformed, disfigured, blurry, text, watermark, low quality, bad anatomy, extra limbs, mutated hands, poorly drawn face, missing arms, missing legs, ugly, distorted features,mosaic,censored' });
+  const [editPrompt, setEditPrompt] = useState({ positive: '', negative: 'deformed, disfigured, blurry, text, watermark, low quality, bad anatomy, extra limbs, mutated hands, poorly drawn face, missing arms, missing legs, ugly, distorted features,mosaic,censored' });
 
   // 使用useMemo确保apiClient只在token变化时重新创建
   const apiClient = useMemo(() => {
