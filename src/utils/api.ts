@@ -51,7 +51,7 @@ export interface InfoResponse {
 export interface ReservedInstancesResponse {
   success: boolean;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>; // 替代 any 类型
   recommend?: string;
 }
 
