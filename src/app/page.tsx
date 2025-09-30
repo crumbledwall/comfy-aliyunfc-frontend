@@ -8,18 +8,30 @@ import { PromptManager } from '../components/PromptManager';
 import { ImageGenerator } from '../components/ImageGenerator';
 
 function MainApp() {
-  const { isAuthenticated } = useAuth();
-  const [currentTab, setCurrentTab] = useState<'prompts' | 'generate'>('prompts');
+  const { isAuthenticated, isCheckingAuth } = useAuth();
+  const [currentTab, setCurrentTab] = useState<'prompts' | 'generate'>('generate');
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !isCheckingAuth) {
       setShowAuthDialog(true);
     } else {
-      // 如果已经认证，确保对话框关闭
+      // 如果已经认证或正在检查认证状态，确保对话框关闭
       setShowAuthDialog(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isCheckingAuth]);
+
+  // 如果正在检查认证状态，显示加载动画
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">正在验证身份...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

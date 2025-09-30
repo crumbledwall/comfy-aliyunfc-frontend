@@ -66,7 +66,6 @@ export const Navigation: React.FC<NavigationProps> = ({ currentTab, onTabChange 
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-700 hidden sm:inline">欢迎, {username}</span>
                     <button
                       onClick={handleLogout}
                       className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 btn-mobile"

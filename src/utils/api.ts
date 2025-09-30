@@ -47,6 +47,14 @@ export interface InfoResponse {
   };
 }
 
+// 添加保留实例响应接口
+export interface ReservedInstancesResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+  recommend?: string;
+}
+
 class ApiClient {
   private token: string | null = null;
 
@@ -163,6 +171,21 @@ class ApiClient {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify({ positive, negative }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // 添加控制保留实例的方法
+  async updateReservedInstances(target: number): Promise<ReservedInstancesResponse> {
+    const response = await fetch(`${API_BASE_URL}/reserved-instances`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ target }),
     });
 
     if (!response.ok) {

@@ -7,6 +7,7 @@ interface AuthContextType {
   username: string;
   token: string;
   isAuthenticated: boolean;
+  isCheckingAuth: boolean; // 添加认证检查状态
   login: (token: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -29,6 +30,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [username, setUsername] = useState('user');
   const [token, setToken] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true); // 默认为true，表示正在检查认证状态
   const [apiClient, setApiClient] = useState<ApiClient | null>(null);
 
   useEffect(() => {
@@ -48,9 +50,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('Token长度不足，清除localStorage中的Token');
         // 如果token格式不正确，清除它
         localStorage.removeItem('auth_token');
+        setIsCheckingAuth(false); // 检查完成
       }
     } else {
       console.log('localStorage中未找到Token');
+      setIsCheckingAuth(false); // 检查完成
     }
   }, []);
 
@@ -69,6 +73,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.log('Token验证失败，清除localStorage中的Token', error);
       localStorage.removeItem('auth_token');
+    } finally {
+      setIsCheckingAuth(false); // 无论成功与否，都设置检查完成
     }
   };
 
@@ -135,6 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       username,
       token,
       isAuthenticated,
+      isCheckingAuth, // 提供认证检查状态
       login,
       logout
     }}>

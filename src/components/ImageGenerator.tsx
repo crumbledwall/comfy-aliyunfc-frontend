@@ -19,6 +19,9 @@ export const ImageGenerator: React.FC = () => {
     negative: string;
   } | null>(null);
   const [savePromptMessage, setSavePromptMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  // 添加保留实例状态
+  const [reservedInstanceEnabled, setReservedInstanceEnabled] = useState(false);
+  const [updatingReservedInstance, setUpdatingReservedInstance] = useState(false);
 
   // 使用useMemo确保apiClient只在token变化时重新创建
   const apiClient = useMemo(() => {
@@ -119,6 +122,28 @@ export const ImageGenerator: React.FC = () => {
     }
   };
 
+  // 添加切换保留实例的函数
+  const toggleReservedInstance = async () => {
+    if (!apiClient) return;
+    
+    setUpdatingReservedInstance(true);
+    try {
+      // 如果当前是开启状态，则关闭（设为0），否则开启（设为1）
+      const target = reservedInstanceEnabled ? 0 : 1;
+      const response = await apiClient.updateReservedInstances(target);
+      
+      if (response.success) {
+        setReservedInstanceEnabled(!reservedInstanceEnabled);
+      } else {
+        setError(`切换保留实例失败: ${response.message}`);
+      }
+    } catch (err) {
+      setError(`切换保留实例时出错: ${err instanceof Error ? err.message : '未知错误'}`);
+    } finally {
+      setUpdatingReservedInstance(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="text-center py-8">
@@ -140,6 +165,39 @@ export const ImageGenerator: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 左侧：Prompt 选择 */}
         <div className="space-y-6">
+          {/* 保留实例开关 */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">资源管理</h2>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-gray-900">保留实例</h3>
+                <p className="text-sm text-gray-500">
+                  {reservedInstanceEnabled 
+                    ? "已启用 - 保持实例常驻内存，提高响应速度" 
+                    : "已禁用 - 按需启动实例，节省资源"}
+                </p>
+              </div>
+              <button
+                onClick={toggleReservedInstance}
+                disabled={updatingReservedInstance}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  reservedInstanceEnabled ? 'bg-green-600' : 'bg-gray-300'
+                } ${updatingReservedInstance ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    reservedInstanceEnabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+            {updatingReservedInstance && (
+              <div className="mt-2 text-sm text-gray-500">
+                正在更新保留实例配置...
+              </div>
+            )}
+          </div>
+
           {/* Prompt 选择 */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-900">选择 Prompt</h2>
