@@ -7,9 +7,11 @@ interface AuthContextType {
   username: string;
   token: string;
   isAuthenticated: boolean;
-  isCheckingAuth: boolean; // 添加认证检查状态
+  isCheckingAuth: boolean;
+  isDarkMode: boolean;
   login: (token: string) => Promise<boolean>;
   logout: () => void;
+  toggleDarkMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,7 +32,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [username, setUsername] = useState('user');
   const [token, setToken] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true); // 默认为true，表示正在检查认证状态
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [apiClient, setApiClient] = useState<ApiClient | null>(null);
 
   useEffect(() => {
@@ -41,6 +44,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 从 localStorage 加载认证信息
     const savedToken = localStorage.getItem('auth_token');
     
+    // 从 localStorage 加载夜间模式设置
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode !== null) {
+      setIsDarkMode(JSON.parse(savedDarkMode));
+    }
+    
     if (savedToken) {
       console.log('从localStorage加载Token:', savedToken.substring(0, Math.min(10, savedToken.length)) + '...');
       // 验证token格式（简单检查）
@@ -50,13 +59,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('Token长度不足，清除localStorage中的Token');
         // 如果token格式不正确，清除它
         localStorage.removeItem('auth_token');
-        setIsCheckingAuth(false); // 检查完成
       }
     } else {
       console.log('localStorage中未找到Token');
-      setIsCheckingAuth(false); // 检查完成
     }
   }, []);
+
+  // 监听夜间模式变化并保存到localStorage
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    
+    // 应用夜间模式到body data-theme属性
+    if (isDarkMode) {
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      document.body.removeAttribute('data-theme');
+    }
+  }, [isDarkMode]);
 
   const checkTokenValidity = async (token: string, client: ApiClient) => {
     try {
@@ -74,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Token验证失败，清除localStorage中的Token', error);
       localStorage.removeItem('auth_token');
     } finally {
-      setIsCheckingAuth(false); // 无论成功与否，都设置检查完成
+      setIsCheckingAuth(false);
     }
   };
 
@@ -131,6 +150,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // 切换夜间模式
+  const toggleDarkMode = () => {
+    setIsDarkMode(prevMode => !prevMode);
+  };
+
   // 添加一个useEffect来监听认证状态变化
   useEffect(() => {
     console.log('认证状态变化:', isAuthenticated ? '已认证' : '未认证');
@@ -141,9 +165,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       username,
       token,
       isAuthenticated,
-      isCheckingAuth, // 提供认证检查状态
+      isCheckingAuth,
+      isDarkMode,
       login,
-      logout
+      logout,
+      toggleDarkMode
     }}>
       {children}
     </AuthContext.Provider>

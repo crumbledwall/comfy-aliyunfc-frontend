@@ -9,7 +9,7 @@ interface AuthDialogProps {
 }
 
 export const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose }) => {
-  const { login } = useAuth();
+  const { login, isDarkMode } = useAuth();
   const [token, setToken] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -49,14 +49,14 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-scaleIn">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-scaleIn dark:bg-gray-800">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Token 认证
           </h2>
           <button 
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 focus:outline-none"
+            className="text-gray-400 hover:text-gray-500 focus:outline-none dark:text-gray-300 dark:hover:text-gray-200"
             disabled={loading}
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +67,7 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose }) => {
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="token" className="block text-sm font-medium text-gray-800 mb-2">
+            <label htmlFor="token" className="block text-sm font-medium text-gray-800 mb-2 dark:text-gray-200">
               认证 Token
             </label>
             <input
@@ -75,14 +75,14 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose }) => {
               id="token"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent input-mobile text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent input-mobile dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               placeholder="请输入认证Token"
               autoComplete="current-password"
             />
           </div>
           
           {error && (
-            <div className="text-red-600 text-sm animate-shake">
+            <div className="text-red-600 text-sm animate-shake dark:text-red-400">
               {error}
             </div>
           )}
@@ -92,14 +92,14 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ isOpen, onClose }) => {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 btn-mobile disabled:opacity-50"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 btn-mobile disabled:opacity-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
             >
               取消
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 btn-mobile disabled:opacity-50 flex items-center justify-center"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 btn-mobile disabled:opacity-50 flex items-center justify-center dark:bg-blue-700 dark:hover:bg-blue-800"
             >
               {loading ? (
                 <>

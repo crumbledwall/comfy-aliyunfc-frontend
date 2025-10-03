@@ -55,6 +55,30 @@ export interface ReservedInstancesResponse {
   recommend?: string;
 }
 
+// 添加获取保留实例状态的响应接口
+export interface ReservedInstancesStatusResponse {
+  success: boolean;
+  message: string;
+  data?: number; // 直接返回数量
+  recommend?: string;
+}
+
+// 添加日志响应接口
+export interface LogResponse {
+  success: boolean;
+  message: string;
+  data?: string;
+  recommend?: string;
+}
+
+// 添加代金券信息响应接口
+export interface CouponResponse {
+  success: boolean;
+  message: string;
+  data?: number | string; // 代金券剩余金额，可能是数字或字符串
+  recommend?: string;
+}
+
 class ApiClient {
   private token: string | null = null;
 
@@ -96,6 +120,20 @@ class ApiClient {
       console.error('Token认证失败:', error);
       return false;
     }
+  }
+
+  // 添加获取代金券信息的方法
+  async getCoupons(): Promise<CouponResponse> {
+    const response = await fetch(`${API_BASE_URL}/coupons`, {
+      method: 'GET',
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
   }
 
   // 添加info接口方法用于验证token
@@ -186,6 +224,34 @@ class ApiClient {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify({ target }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // 添加获取保留实例状态的方法
+  async getReservedInstancesStatus(): Promise<ReservedInstancesStatusResponse> {
+    const response = await fetch(`${API_BASE_URL}/reserved-instances`, {
+      method: 'GET',
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // 添加获取日志的方法
+  async getLogs(): Promise<LogResponse> {
+    const response = await fetch(`${API_BASE_URL}/logs`, {
+      method: 'GET',
+      headers: this.getAuthHeaders(),
     });
 
     if (!response.ok) {

@@ -5,7 +5,7 @@ import { useAuth } from '../components/AuthProvider';
 import ApiClient, { Prompt } from '../utils/api';
 
 export const PromptManager: React.FC = () => {
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, isDarkMode } = useAuth();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -116,45 +116,45 @@ export const PromptManager: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">请先进行身份认证</p>
+        <p className="text-gray-500 dark:text-gray-400">请先进行身份认证</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Prompt 管理</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6 dark:text-white">Prompt 管理</h1>
       
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 dark:bg-red-900 dark:border-red-700 dark:text-red-100">
           {error}
         </div>
       )}
 
       {/* 添加新 Prompt */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6 text-gray-900">
-        <h2 className="text-xl font-semibold mb-4">添加新 Prompt</h2>
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6 text-gray-900 dark:bg-gray-800 dark:text-white">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">添加新 Prompt</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">
+            <label className="block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200">
               Positive Prompt
             </label>
             <textarea
               value={newPrompt.positive}
               onChange={(e) => setNewPrompt({ ...newPrompt, positive: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 textarea-mobile text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 textarea-mobile dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               rows={3}
               placeholder="输入 positive prompt..."
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">
+            <label className="block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200">
               Negative Prompt
             </label>
             <textarea
               value={newPrompt.negative}
               onChange={(e) => setNewPrompt({ ...newPrompt, negative: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 textarea-mobile text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 textarea-mobile dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               rows={2}
               placeholder="输入 negative prompt..."
             />
@@ -162,7 +162,7 @@ export const PromptManager: React.FC = () => {
           <button
             onClick={handleAddPrompt}
             disabled={loading || !newPrompt.positive.trim()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed btn-mobile"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed btn-mobile dark:bg-blue-700 dark:hover:bg-blue-800"
           >
             {loading ? '添加中...' : '添加 Prompt'}
           </button>
@@ -172,43 +172,45 @@ export const PromptManager: React.FC = () => {
       {/* Prompt 列表 */}
       <div className="space-y-4">
         {prompts.map((prompt) => (
-          <div key={prompt.index} className="bg-white rounded-lg shadow-md p-6">
+          <div key={prompt.index} className="bg-white rounded-lg shadow-md p-6 dark:bg-gray-800">
             {editingIndex === prompt.index ? (
               // 编辑模式
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-2">
+                  <label className="block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200">
                     Positive Prompt
                   </label>
                   <textarea
                     value={editPrompt.positive}
                     onChange={(e) => setEditPrompt({ ...editPrompt, positive: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 textarea-mobile text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 textarea-mobile dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     rows={3}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-800 mb-2">
+                  <label className="block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200">
                     Negative Prompt
                   </label>
                   <textarea
                     value={editPrompt.negative}
                     onChange={(e) => setEditPrompt({ ...editPrompt, negative: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 textarea-mobile text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 textarea-mobile dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     rows={2}
                   />
                 </div>
-                <div className="flex space-x-2">
+                
+                <div className="flex space-x-2 pt-2">
                   <button
                     onClick={() => handleEditPrompt(prompt.index)}
-                    disabled={loading || !editPrompt.positive.trim()}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 btn-mobile"
+                    disabled={loading}
+                    className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-50 dark:bg-green-700 dark:hover:bg-green-800"
                   >
-                    {loading ? '保存中...' : '保存'}
+                    保存
                   </button>
                   <button
                     onClick={cancelEdit}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 btn-mobile"
+                    disabled={loading}
+                    className="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm hover:bg-gray-400 disabled:opacity-50 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                   >
                     取消
                   </button>
@@ -217,57 +219,37 @@ export const PromptManager: React.FC = () => {
             ) : (
               // 显示模式
               <div>
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Prompt #{prompt.index}
-                  </h3>
-                  <div className="flex space-x-2">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900 dark:text-white">{prompt.positive}</p>
+                    <p className="text-sm text-gray-600 mt-1 dark:text-gray-300">{prompt.negative}</p>
+                  </div>
+                  <div className="flex space-x-1 ml-2">
                     <button
                       onClick={() => startEdit(prompt)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 btn-mobile"
+                      className="p-1 text-gray-500 hover:text-blue-600 focus:outline-none dark:text-gray-400 dark:hover:text-blue-400"
                     >
-                      编辑
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                     </button>
                     <button
                       onClick={() => handleDeletePrompt(prompt.index)}
-                      className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 btn-mobile"
+                      className="p-1 text-gray-500 hover:text-red-600 focus:outline-none dark:text-gray-400 dark:hover:text-red-400"
                     >
-                      删除
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
                     </button>
                   </div>
                 </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-800 mb-1">
-                      Positive Prompt:
-                    </label>
-                    <p className="text-gray-900 bg-gray-50 p-3 rounded border">
-                      {prompt.positive}
-                    </p>
-                  </div>
-                  
-                  {prompt.negative && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-800 mb-1">
-                        Negative Prompt:
-                      </label>
-                      <p className="text-gray-900 bg-gray-50 p-3 rounded border">
-                        {prompt.negative}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  ID: {prompt.index}
+                </p>
               </div>
             )}
           </div>
         ))}
-        
-        {prompts.length === 0 && !loading && (
-          <div className="text-center py-8 text-gray-500">
-            暂无 Prompt，请添加第一个 Prompt
-          </div>
-        )}
       </div>
     </div>
   );

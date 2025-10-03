@@ -3,6 +3,38 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-background: #ffffff;
+  --card-foreground: #171717;
+  --header-background: #ffffff;
+  --header-foreground: #171717;
+  --button-primary: #3b82f6;
+  --button-primary-hover: #2563eb;
+  --button-secondary: #6b7280;
+  --button-secondary-hover: #4b5563;
+  --border-color: #d1d5db;
+  --input-background: #ffffff;
+  --input-foreground: #171717;
+  --input-border: #d1d5db;
+  --input-placeholder: #6b7280;
+}
+
+/* 夜间模式变量 */
+[data-theme="dark"] {
+  --background: #1a202c;
+  --foreground: #e2e8f0;
+  --card-background: #2d3748;
+  --card-foreground: #e2e8f0;
+  --header-background: #2d3748;
+  --header-foreground: #e2e8f0;
+  --button-primary: #4299e1;
+  --button-primary-hover: #3182ce;
+  --button-secondary: #718096;
+  --button-secondary-hover: #4a5568;
+  --border-color: #4a5568;
+  --input-background: #4a5568;
+  --input-foreground: #e2e8f0;
+  --input-border: #718096;
+  --input-placeholder: #a0aec0;
 }
 
 @theme inline {
@@ -23,6 +55,197 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 夜间模式样式 */
+body[data-theme="dark"] {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* 输入框样式 */
+input, textarea, select {
+  background: var(--input-background);
+  color: var(--input-foreground);
+  border-color: var(--input-border);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* 卡片样式 */
+.bg-white {
+  background: var(--card-background);
+  color: var(--card-foreground);
+}
+
+.text-gray-900 {
+  color: var(--card-foreground);
+}
+
+.text-gray-700 {
+  color: #374151; /* 日间模式 */
+}
+
+body[data-theme="dark"] .text-gray-700 {
+  color: #cbd5e0; /* 夜间模式 */
+}
+
+.text-gray-600 {
+  color: #4b5563; /* 日间模式 */
+}
+
+body[data-theme="dark"] .text-gray-600 {
+  color: #a0aec0; /* 夜间模式 */
+}
+
+.text-gray-500 {
+  color: #4b5563; /* 日间模式，加深颜色 */
+}
+
+body[data-theme="dark"] .text-gray-500 {
+  color: #718096; /* 夜间模式 */
+}
+
+.text-gray-400 {
+  color: #6b7280; /* 日间模式，加深颜色 */
+}
+
+body[data-theme="dark"] .text-gray-400 {
+  color: #a0aec0; /* 夜间模式 */
+}
+
+.text-gray-300 {
+  color: #9ca3af; /* 日间模式 */
+}
+
+body[data-theme="dark"] .text-gray-300 {
+  color: #e2e8f0; /* 夜间模式 */
+}
+
+.border-gray-300 {
+  border-color: var(--border-color);
+}
+
+.bg-gray-50 {
+  background: #f9fafb; /* 日间模式 */
+}
+
+body[data-theme="dark"] .bg-gray-50 {
+  background: #2d3748; /* 夜间模式 */
+}
+
+.bg-gray-100 {
+  background: #f3f4f6; /* 日间模式 */
+}
+
+body[data-theme="dark"] .bg-gray-100 {
+  background: #4a5568; /* 夜间模式 */
+}
+
+.bg-gray-900 {
+  background: #111827; /* 日间模式，深色背景用于日志等 */
+}
+
+body[data-theme="dark"] .bg-gray-900 {
+  background: #1a202c; /* 夜间模式 */
+}
+
+/* 警告和错误样式 */
+.bg-red-100 {
+  background: #fee2e2; /* 日间模式 */
+}
+
+body[data-theme="dark"] .bg-red-100 {
+  background: #fed7d7; /* 夜间模式 */
+}
+
+.border-red-400 {
+  border-color: #f87171; /* 日间模式 */
+}
+
+body[data-theme="dark"] .border-red-400 {
+  border-color: #c53030; /* 夜间模式 */
+}
+
+.text-red-700 {
+  color: #b91c1c; /* 日间模式 */
+}
+
+body[data-theme="dark"] .text-red-700 {
+  color: #c53030; /* 夜间模式 */
+}
+
+.text-red-600 {
+  color: #dc2626; /* 日间模式 */
+}
+
+body[data-theme="dark"] .text-red-600 {
+  color: #e53e3e; /* 夜间模式 */
+}
+
+/* 按钮样式 */
+.bg-blue-600 {
+  background: var(--button-primary);
+}
+
+.hover\:bg-blue-700:hover {
+  background: var(--button-primary-hover);
+}
+
+.bg-blue-600:hover {
+  background: var(--button-primary-hover);
+}
+
+.bg-green-600 {
+  background: #16a34a; /* 日间模式 */
+}
+
+body[data-theme="dark"] .bg-green-600 {
+  background: #16a34a; /* 夜间模式 */
+}
+
+.hover\:bg-green-700:hover {
+  background: #15803d; /* 日间模式 */
+}
+
+body[data-theme="dark"] .hover\:bg-green-700:hover {
+  background: #15803d; /* 夜间模式 */
+}
+
+.bg-red-600 {
+  background: #dc2626; /* 日间模式 */
+}
+
+body[data-theme="dark"] .bg-red-600 {
+  background: #e53e3e; /* 夜间模式 */
+}
+
+.hover\:bg-red-700:hover {
+  background: #b91c1c; /* 日间模式 */
+}
+
+body[data-theme="dark"] .hover\:bg-red-700:hover {
+  background: #c53030; /* 夜间模式 */
+}
+
+/* 开关样式 */
+.bg-gray-300 {
+  background: #d1d5db; /* 日间模式 */
+}
+
+body[data-theme="dark"] .bg-gray-300 {
+  background: #718096; /* 夜间模式 */
+}
+
+.bg-gray-600 {
+  background: #718096; /* 日间模式 */
+}
+
+body[data-theme="dark"] .bg-gray-600 {
+  background: #4a5568; /* 夜间模式 */
 }
 
 /* 移动端优化 */
@@ -78,6 +301,25 @@ body {
   .animate-shake {
     animation: shake 0.5s ease-in-out;
   }
+  
+  .animate-smoothSlide {
+    animation: smoothSlide 0.3s ease-out;
+  }
+  
+  .animate-buttonPulse {
+    animation: buttonPulse 1.5s ease-in-out infinite;
+  }
+  
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* 加载动画居中 */
+  .flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 @keyframes fadeIn {
@@ -109,5 +351,28 @@ body {
   }
   75% {
     transform: translateX(5px);
+  }
+}
+
+@keyframes smoothSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes buttonPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
   }
 }
