@@ -59,9 +59,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('Token长度不足，清除localStorage中的Token');
         // 如果token格式不正确，清除它
         localStorage.removeItem('auth_token');
+        // 确保设置为false
+        setIsCheckingAuth(false);
       }
     } else {
       console.log('localStorage中未找到Token');
+      // 确保设置为false
+      setIsCheckingAuth(false);
     }
   }, []);
 
@@ -80,7 +84,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkTokenValidity = async (token: string, client: ApiClient) => {
     try {
       client.setToken(token);
-      const response = await client.getInfo();
+      
+      // 添加超时机制
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Token验证超时')), 10000)
+      );
+      
+      const responsePromise = client.getInfo();
+      const response = (await Promise.race([responsePromise, timeout])) as import('../utils/api').InfoResponse;
+      
       if (response.success) {
         setToken(token);
         setIsAuthenticated(true);
@@ -93,6 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Token验证失败，清除localStorage中的Token', error);
       localStorage.removeItem('auth_token');
     } finally {
+      // 确保无论如何都设置为false
       setIsCheckingAuth(false);
     }
   };
@@ -109,7 +122,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (apiClient) {
         apiClient.setToken(token);
         try {
-          const response = await apiClient.getInfo();
+          // 添加超时机制
+          const timeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Token验证超时')), 10000)
+          );
+          
+          const responsePromise = apiClient.getInfo();
+          const response = (await Promise.race([responsePromise, timeout])) as import('../utils/api').InfoResponse;
+          
           if (response.success) {
             setToken(token);
             setIsAuthenticated(true);
