@@ -110,8 +110,7 @@ export const ImageGenerator: React.FC = () => {
           negative: response.negative_prompt
         });
         
-        // 生成成功后触发加载最新图片
-        loadLatestPic();
+        setLatestPicUrl(null);
       } else {
         setError(response.message);
       }
