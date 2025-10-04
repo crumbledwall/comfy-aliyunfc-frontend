@@ -10,7 +10,7 @@ import { InfoPage } from '../components/InfoPage';
 
 function MainApp() {
   const { isAuthenticated, isCheckingAuth } = useAuth();
-  const [currentTab, setCurrentTab] = useState<'prompts' | 'generate' | 'logs'>('prompts');
+  const [currentTab, setCurrentTab] = useState<'prompts' | 'generate' | 'logs'>('generate');
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   useEffect(() => {

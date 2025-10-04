@@ -71,6 +71,14 @@ export interface LogResponse {
   recommend?: string;
 }
 
+// 添加最新图片响应接口
+export interface LatestPicResponse {
+  success: boolean;
+  message: string;
+  data?: string; // 图片URL
+  recommend?: string;
+}
+
 // 添加代金券信息响应接口
 export interface CouponResponse {
   success: boolean;
@@ -204,11 +212,12 @@ class ApiClient {
     return response.json();
   }
 
-  async generateImage(positive: string, negative: string = ''): Promise<GenerateResponse> {
+  async generateImage(positive: string, negative: string = '', signal?: AbortSignal): Promise<GenerateResponse> {
     const response = await fetch(`${API_BASE_URL}/invoke`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify({ positive, negative }),
+      signal, // 添加abort信号支持
     });
 
     if (!response.ok) {
@@ -250,6 +259,20 @@ class ApiClient {
   // 添加获取日志的方法
   async getLogs(): Promise<LogResponse> {
     const response = await fetch(`${API_BASE_URL}/logs`, {
+      method: 'GET',
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  // 添加获取最新图片的方法
+  async getLatestPic(): Promise<LatestPicResponse> {
+    const response = await fetch(`${API_BASE_URL}/latest-pic`, {
       method: 'GET',
       headers: this.getAuthHeaders(),
     });

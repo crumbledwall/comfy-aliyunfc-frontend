@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import ApiClient, { Prompt, ImageResult } from '../utils/api';
 
@@ -23,6 +23,14 @@ export const ImageGenerator: React.FC = () => {
   const [reservedInstanceEnabled, setReservedInstanceEnabled] = useState(false);
   const [updatingReservedInstance, setUpdatingReservedInstance] = useState(false);
   const [loadingReservedInstanceStatus, setLoadingReservedInstanceStatus] = useState(true);
+  // 添加最新图片状态
+  const [latestPicUrl, setLatestPicUrl] = useState<string | null>(null);
+  const [loadingLatestPic, setLoadingLatestPic] = useState(false);
+  // 添加全屏状态
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  
+  // 添加abort controller引用，用于取消请求
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // 使用useMemo确保apiClient只在token变化时重新创建
   const apiClient = useMemo(() => {
@@ -89,8 +97,11 @@ export const ImageGenerator: React.FC = () => {
     setError('');
     setGeneratedImages([]);
 
+    // 创建新的AbortController用于取消请求
+    abortControllerRef.current = new AbortController();
+    
     try {
-      const response = await apiClient.generateImage(positive, negative);
+      const response = await apiClient.generateImage(positive, negative, abortControllerRef.current.signal);
       if (response.success) {
         setGeneratedImages(response.images);
         setLastGeneration({
@@ -98,14 +109,61 @@ export const ImageGenerator: React.FC = () => {
           positive: response.positive_prompt,
           negative: response.negative_prompt
         });
+        
+        // 生成成功后触发加载最新图片
+        loadLatestPic();
       } else {
         setError(response.message);
       }
-    } catch (err) {
-      setError(`生成失败: ${err instanceof Error ? err.message : '未知错误'}`);
+    } catch (err: any) {
+      // 检查是否是取消请求导致的错误
+      if (err.name === 'AbortError') {
+        setError('请求已被取消');
+      } else {
+        setError(`生成失败: ${err instanceof Error ? err.message : '未知错误'}`);
+      }
     } finally {
       setGenerating(false);
+      abortControllerRef.current = null;
     }
+  };
+
+  // 添加取消生成请求的函数
+  const handleCancelGenerate = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setGenerating(false);
+      abortControllerRef.current = null;
+      
+      // 取消请求后触发加载最新图片
+      loadLatestPic();
+    }
+  };
+
+  // 添加加载最新图片的函数
+  const loadLatestPic = async () => {
+    if (!apiClient) return;
+    
+    setLoadingLatestPic(true);
+    setError('');
+    
+    try {
+      const response = await apiClient.getLatestPic();
+      if (response.success && response.data) {
+        setLatestPicUrl(response.data);
+      } else {
+        setError(response.message || '获取最新图片失败');
+      }
+    } catch (err) {
+      setError(`获取最新图片时出错: ${err instanceof Error ? err.message : '未知错误'}`);
+    } finally {
+      setLoadingLatestPic(false);
+    }
+  };
+
+  // 添加切换全屏显示的函数
+  const toggleFullscreen = (imageUrl: string | null) => {
+    setFullscreenImage(imageUrl);
   };
 
   // 添加保存Prompt到在线列表的函数
@@ -288,6 +346,25 @@ export const ImageGenerator: React.FC = () => {
             >
               {generating ? '生成中...' : '生成图片'}
             </button>
+            
+            {/* 取消生成按钮和加载最新图片按钮 */}
+            <div className="flex space-x-2 mt-2">
+              {generating && (
+                <button
+                  onClick={handleCancelGenerate}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 btn-mobile dark:bg-red-700 dark:hover:bg-red-800"
+                >
+                  取消生成
+                </button>
+              )}
+              <button
+                onClick={loadLatestPic}
+                disabled={loadingLatestPic}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 btn-mobile dark:bg-blue-700 dark:hover:bg-blue-800"
+              >
+                {loadingLatestPic ? '加载中...' : '最新图片'}
+              </button>
+            </div>
           </div>
 
           {/* 生成信息 */}
@@ -338,12 +415,45 @@ export const ImageGenerator: React.FC = () => {
 
         {/* 右侧：图片展示 */}
         <div className="space-y-6">
+          {/* 显示最新图片 */}
+          {latestPicUrl && (
+            <div className="bg-white rounded-lg shadow-md p-6 dark:bg-gray-800">
+              <h3 className="text-lg font-semibold mb-4 dark:text-white">最新图片</h3>
+              <div className="border rounded-lg overflow-hidden dark:border-gray-700">
+                <div 
+                  className="aspect-square bg-gray-100 flex items-center justify-center dark:bg-gray-700 cursor-pointer"
+                  onClick={() => toggleFullscreen(latestPicUrl)}
+                >
+                  <img
+                    src={latestPicUrl}
+                    alt="Latest generated image"
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<div class="text-gray-500 text-center p-4 dark:text-gray-400">图片加载失败</div>';
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 移除了之前的弹窗代码 */}
 
           {generating && (
             <div className="bg-white rounded-lg shadow-md p-6 text-center dark:bg-gray-800">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-700 dark:text-gray-300">正在生成图片，请稍候...</p>
+              <button
+                onClick={handleCancelGenerate}
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+              >
+                取消生成
+              </button>
             </div>
           )}
 
@@ -353,7 +463,10 @@ export const ImageGenerator: React.FC = () => {
               <div className="grid grid-cols-1 gap-4">
                 {generatedImages.map((image, index) => (
                   <div key={index} className="border rounded-lg overflow-hidden dark:border-gray-700">
-                    <div className="aspect-square bg-gray-100 flex items-center justify-center dark:bg-gray-700">
+                    <div 
+                      className="aspect-square bg-gray-100 flex items-center justify-center dark:bg-gray-700 cursor-pointer"
+                      onClick={() => toggleFullscreen(image.public_url)}
+                    >
                       <img
                         src={image.public_url}
                         alt={`Generated image ${index + 1}`}
@@ -379,7 +492,7 @@ export const ImageGenerator: React.FC = () => {
             </div>
           )}
 
-          {!generating && generatedImages.length === 0 && (
+          {!generating && generatedImages.length === 0 && !latestPicUrl && (
             <div className="bg-white rounded-lg shadow-md p-6 text-center dark:bg-gray-800">
               <div className="text-gray-400 text-6xl mb-4 dark:text-gray-500">🖼️</div>
               <p className="text-gray-600 dark:text-gray-400">生成的图片将在这里显示</p>
@@ -387,6 +500,29 @@ export const ImageGenerator: React.FC = () => {
           )}
         </div>
       </div>
+      
+      {/* 全屏图片展示模态框 */}
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4 cursor-pointer"
+          onClick={() => toggleFullscreen(null)}
+        >
+          <div className="relative max-w-full max-h-full">
+            <img
+              src={fullscreenImage}
+              alt="Fullscreen view"
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()} // 防止点击图片时关闭模态框
+            />
+            <button
+              className="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-75 transition-all"
+              onClick={() => toggleFullscreen(null)}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

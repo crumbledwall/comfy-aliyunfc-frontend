@@ -60,7 +60,7 @@ export const InfoPage: React.FC = () => {
         setLogs(prevLogs => {
           const newLogs = response.data || '';
           if (prevLogs) {
-            return prevLogs + '\n' + newLogs;
+            return newLogs;
           }
           return newLogs;
         });
