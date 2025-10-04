@@ -52,7 +52,7 @@ export const ImageGenerator: React.FC = () => {
       if (response.success) {
         setPrompts(response.prompts);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('加载 prompts 失败:', err);
     }
   };
@@ -68,7 +68,7 @@ export const ImageGenerator: React.FC = () => {
         // 如果返回的数据是1，表示开启；如果是0，表示关闭
         setReservedInstanceEnabled(response.data === 1);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('加载保留实例状态失败:', err);
     } finally {
       // 延迟设置加载完成状态，确保动画平滑过渡
@@ -115,9 +115,9 @@ export const ImageGenerator: React.FC = () => {
       } else {
         setError(response.message);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // 检查是否是取消请求导致的错误
-      if (err.name === 'AbortError') {
+      if (err instanceof Error && err.name === 'AbortError') {
         setError('请求已被取消');
       } else {
         setError(`生成失败: ${err instanceof Error ? err.message : '未知错误'}`);
@@ -154,7 +154,7 @@ export const ImageGenerator: React.FC = () => {
       } else {
         setError(response.message || '获取最新图片失败');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError(`获取最新图片时出错: ${err instanceof Error ? err.message : '未知错误'}`);
     } finally {
       setLoadingLatestPic(false);
@@ -184,7 +184,7 @@ export const ImageGenerator: React.FC = () => {
       } else {
         setSavePromptMessage({type: 'error', text: `保存失败: ${response.message}`});
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setSavePromptMessage({type: 'error', text: `保存时出错: ${err instanceof Error ? err.message : '未知错误'}`});
     }
     
@@ -218,7 +218,7 @@ export const ImageGenerator: React.FC = () => {
       } else {
         setError(`切换保留实例失败: ${response.message}`);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError(`切换保留实例时出错: ${err instanceof Error ? err.message : '未知错误'}`);
     } finally {
       setUpdatingReservedInstance(false);
